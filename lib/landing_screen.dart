@@ -1,3 +1,4 @@
+import 'package:chatsta/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:swipeable_button_view/swipeable_button_view.dart';
 import 'package:flutter/cupertino.dart';
@@ -11,6 +12,14 @@ class LandingScreen extends StatefulWidget {
 }
 
 class _LandingScreenState extends State<LandingScreen> {
+  late bool isFinished;
+
+  @override
+  void initState() {
+    isFinished = false;
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -63,8 +72,19 @@ class _LandingScreenState extends State<LandingScreen> {
                 ),
                 const SizedBox(height: 20),
                 SwipeableButtonView(
-                  onFinish: () {},
-                  onWaitingProcess: () {},
+                  isFinished: isFinished,
+                  onFinish: () {
+                    Navigator.push(context, MaterialPageRoute<void>(
+                      builder: (BuildContext context) {
+                        return const HomeScreen();
+                      },
+                    ));
+                  },
+                  onWaitingProcess: () {
+                    setState(() {
+                      isFinished = true;
+                    });
+                  },
                   activeColor: Colors.blue,
                   buttonWidget: Container(
                     child: Icon(
