@@ -68,7 +68,7 @@ class _HomeScreenState extends State<HomeScreen> {
         body: SingleChildScrollView(
           child: Column(
             children: [
-              Container(
+              SizedBox(
                 height: 100,
                 child: ListView.builder(
                     itemCount: people.length,
