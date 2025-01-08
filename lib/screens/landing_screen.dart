@@ -1,4 +1,4 @@
-import 'package:chatsta/home_screen.dart';
+import 'package:chatsta/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:swipeable_button_view/swipeable_button_view.dart';
 import 'package:flutter/cupertino.dart';
