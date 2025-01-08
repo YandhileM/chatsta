@@ -109,11 +109,15 @@ class _HomeScreenState extends State<HomeScreen> {
                     padding: const EdgeInsets.all(8.0),
                     child: ListTile(
                       onTap: () {
-                        Navigator.push(context, MaterialPageRoute<void>(
-                          builder: (BuildContext context) {
-                            return const ChatDetailsScreen();
-                          },
-                        ));
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute<void>(
+                              builder: (BuildContext context) =>
+                                  ChatDetailsScreen(
+                                index + 1,
+                                people[index],
+                              ),
+                            ));
                       },
                       leading: Container(
                         decoration: BoxDecoration(
