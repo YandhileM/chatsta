@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -8,6 +9,16 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  List<String> people = [
+    'Colton',
+    'Yandhile',
+    'Micheal',
+    'John',
+    'Doe',
+    'Jane',
+    'Blessing',
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,11 +63,117 @@ class _HomeScreenState extends State<HomeScreen> {
         body: SingleChildScrollView(
           child: Column(
             children: [
+              Container(
+                height: 100,
+                child: ListView.builder(
+                    itemCount: people.length,
+                    shrinkWrap: true,
+                    scrollDirection: Axis.horizontal,
+                    itemBuilder: (context, int i) {
+                      return Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              height: 60,
+                              width: 60,
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade200,
+                                image: DecorationImage(
+                                  image: AssetImage(
+                                    'assets/${i + 1}.png',
+                                  ),
+                                  scale: 10,
+                                ),
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              people[i],
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
+              ),
+              const Divider(),
               ListView.builder(
-                  itemCount: 10,
-                  itemBuilder: (context, int i) {
-                    return Container();
-                  })
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: people.length,
+                itemBuilder: (context, index) {
+                  return Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: ListTile(
+                      onTap: () {},
+                      leading: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade200,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(6.0),
+                          child: Image.asset(
+                            'assets/${index + 1}.png',
+                          ),
+                        ),
+                      ),
+                      title: Text(
+                        people[index],
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      subtitle: const Text(
+                        "Hey, how are you doing? I'm just checking up on you. 🔥",
+                      ),
+                      trailing: Column(
+                        children: [
+                          const Text(
+                            '00:01',
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: Colors.grey,
+                            ),
+                          ),
+                          const SizedBox(height: 5),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                CupertinoIcons.pin_fill,
+                                size: 15,
+                                color: Colors.grey,
+                              ),
+                              const SizedBox(width: 5),
+                              Container(
+                                height: 15,
+                                width: 15,
+                                decoration: const BoxDecoration(
+                                  color: Colors.blue,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Center(
+                                  child: Text(
+                                    '1',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              )
             ],
           ),
         ));
