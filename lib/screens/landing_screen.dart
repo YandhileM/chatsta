@@ -1,7 +1,9 @@
-import 'package:chatsta/screens/home_screen.dart';
+// import 'package:chatsta/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:swipeable_button_view/swipeable_button_view.dart';
 import 'package:flutter/cupertino.dart';
+// import 'package:chatsta/screens/auth/sign_in.dart';
+import 'package:chatsta/screens/auth/welcome_screen.dart';
 // import 'package:flutter/material.dart';
 
 class LandingScreen extends StatefulWidget {
@@ -76,7 +78,7 @@ class _LandingScreenState extends State<LandingScreen> {
                   onFinish: () {
                     Navigator.push(context, MaterialPageRoute<void>(
                       builder: (BuildContext context) {
-                        return const HomeScreen();
+                        return const WelcomeScreen();
                       },
                     ));
                   },
