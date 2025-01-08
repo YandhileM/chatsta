@@ -18,6 +18,10 @@ class _HomeScreenState extends State<HomeScreen> {
     'Doe',
     'Jane',
     'Blessing',
+    'Grace',
+    'Micheal',
+    'Mpilo',
+    'Micheal',
   ];
 
   @override
@@ -169,7 +173,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 child: const Center(
                                   child: Text(
                                     '1',
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 9,
                                       fontWeight: FontWeight.bold,
