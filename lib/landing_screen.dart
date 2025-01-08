@@ -87,7 +87,7 @@ class _LandingScreenState extends State<LandingScreen> {
                   },
                   activeColor: Colors.blue,
                   buttonWidget: Container(
-                    child: Icon(
+                    child: const Icon(
                       CupertinoIcons.chevron_right_2,
                       color: Colors.grey,
                     ),
