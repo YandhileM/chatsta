@@ -110,7 +110,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         style: TextStyle(
                           color: containsUpperCase
                               ? Colors.green
-                              : Theme.of(context).colorScheme.onBackground,
+                              : Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                       Text(
@@ -118,7 +118,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         style: TextStyle(
                           color: containsLowerCase
                               ? Colors.green
-                              : Theme.of(context).colorScheme.onBackground,
+                              : Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                       Text(
@@ -126,7 +126,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         style: TextStyle(
                           color: containsNumber
                               ? Colors.green
-                              : Theme.of(context).colorScheme.onBackground,
+                              : Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                     ],
@@ -139,7 +139,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         style: TextStyle(
                           color: containsSpecialChar
                               ? Colors.green
-                              : Theme.of(context).colorScheme.onBackground,
+                              : Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                       Text(
@@ -147,7 +147,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         style: TextStyle(
                           color: contains8Length
                               ? Colors.green
-                              : Theme.of(context).colorScheme.onBackground,
+                              : Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                     ],
@@ -188,7 +188,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   },
                   style: TextButton.styleFrom(
                     elevation: 3.0,
-                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    backgroundColor: Colors.blue,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(60),

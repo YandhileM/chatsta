@@ -1,6 +1,7 @@
 import 'package:chatsta/screens/auth/components/text_field.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:chatsta/screens/home_screen.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -82,17 +83,17 @@ class _SignInScreenState extends State<SignInScreen> {
                 width: MediaQuery.of(context).size.width * 0.5,
                 child: TextButton(
                   onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      Navigator.push(context, MaterialPageRoute<void>(
-                        builder: (BuildContext context) {
-                          return const Placeholder(); // Replace with HomeScreen
-                        },
-                      ));
-                    }
+                    // if (_formKey.currentState!.validate()) {
+                    Navigator.push(context, MaterialPageRoute<void>(
+                      builder: (BuildContext context) {
+                        return const HomeScreen();
+                      },
+                    ));
+                    // }
                   },
                   style: TextButton.styleFrom(
                     elevation: 3.0,
-                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    backgroundColor: Colors.blue,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(60),

@@ -88,11 +88,9 @@ class _LandingScreenState extends State<LandingScreen> {
                     });
                   },
                   activeColor: Colors.blue,
-                  buttonWidget: Container(
-                    child: const Icon(
-                      CupertinoIcons.chevron_right_2,
-                      color: Colors.grey,
-                    ),
+                  buttonWidget: const Icon(
+                    CupertinoIcons.chevron_right_2,
+                    color: Colors.grey,
                   ),
                   buttonText: "Swipe to start",
                 )
