@@ -1,3 +1,4 @@
+import 'package:chatsta/chat_details_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
@@ -107,7 +108,13 @@ class _HomeScreenState extends State<HomeScreen> {
                   return Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: ListTile(
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.push(context, MaterialPageRoute<void>(
+                          builder: (BuildContext context) {
+                            return const ChatDetailsScreen();
+                          },
+                        ));
+                      },
                       leading: Container(
                         decoration: BoxDecoration(
                           color: Colors.grey.shade200,
