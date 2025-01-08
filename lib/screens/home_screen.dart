@@ -44,7 +44,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               Text(
-                'Chatsta message',
+                'Chatsta',
                 style: TextStyle(
                   color: Colors.black,
                 ),
