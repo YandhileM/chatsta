@@ -21,6 +21,9 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
     "I will call you later",
   ];
 
+  TextEditingController _controller = TextEditingController();
+  String message = "";
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -201,8 +204,14 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
                         CupertinoIcons.paperclip,
                       ),
                       const SizedBox(width: 20),
-                      const Expanded(
+                      Expanded(
                         child: TextField(
+                          controller: _controller,
+                          onChanged: ((value) {
+                            setState(() {
+                              message = value;
+                            });
+                          }),
                           decoration: InputDecoration(
                             hintText: "Type message...",
                             border: InputBorder.none,
@@ -210,18 +219,39 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
                         ),
                       ),
                       const SizedBox(width: 20),
-                      Container(
-                        width: 50,
-                        height: 50,
-                        decoration: const BoxDecoration(
-                          color: Colors.blue,
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          CupertinoIcons.mic,
-                          color: Colors.white,
-                        ),
-                      )
+                      message.isEmpty
+                          ? Container(
+                              width: 50,
+                              height: 50,
+                              decoration: const BoxDecoration(
+                                color: Colors.blue,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                CupertinoIcons.mic,
+                                color: Colors.white,
+                              ),
+                            )
+                          : GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  messages.add(message);
+                                  _controller.clear();
+                                });
+                              },
+                              child: Container(
+                                width: 50,
+                                height: 50,
+                                decoration: const BoxDecoration(
+                                  color: Colors.blue,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  CupertinoIcons.paperplane,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            )
                     ],
                   ),
                 ),
