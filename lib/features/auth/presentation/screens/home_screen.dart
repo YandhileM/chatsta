@@ -1,6 +1,8 @@
 import 'package:chatsta/features/auth/presentation/screens/chat_details_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:chatsta/features/auth/presentation/screens/Users/user_screen.dart';
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -55,9 +57,16 @@ class _HomeScreenState extends State<HomeScreen> {
             Padding(
               padding: const EdgeInsets.only(right: 8.0),
               child: IconButton(
-                onPressed: () {},
+                onPressed: () {
+                    Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute<void>(
+                      builder: (BuildContext context) => const UsersScreen(),
+                    ),
+                  );
+                },
                 icon: const Icon(
-                  Icons.edit_square,
+                  Icons.add,
                   // CupertinoIcons.pencil_circle_fill,
                   color: Colors.grey,
                 ),
