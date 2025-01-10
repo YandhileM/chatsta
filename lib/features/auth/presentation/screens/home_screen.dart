@@ -34,6 +34,12 @@ class _HomeScreenState extends State<HomeScreen> {
           elevation: 0,
           backgroundColor: Colors.white,
           centerTitle: false,
+            leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
           title: const Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
