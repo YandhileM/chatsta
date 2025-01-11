@@ -10,7 +10,7 @@ class ApiService {
   static Map<String, String> getHeaders({
     String? projectId,
     String? userName,
-    String? userSecret,
+    String? secret,
   }) {
     Map<String, String> headers = {
       'Content-Type': 'application/json',
@@ -19,7 +19,7 @@ class ApiService {
     if (privateKey.isNotEmpty) headers['PRIVATE-KEY'] = privateKey;
     if (projectId != null) headers['Project-ID'] = projectId;
     if (userName != null) headers['User-Name'] = userName;
-    if (userSecret != null) headers['User-Secret'] = userSecret;
+    if (secret != null) headers['User-Secret'] = secret;
 
     return headers;
   }
