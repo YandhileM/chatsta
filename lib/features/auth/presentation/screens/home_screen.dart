@@ -1,8 +1,9 @@
-import 'package:chatsta/features/auth/presentation/screens/chat_details_screen.dart';
+import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:chatsta/features/auth/presentation/screens/Users/user_screen.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../../../../data/services/chat_service.dart';
+import 'chat_details_screen.dart';
+import 'Users/user_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -12,200 +13,124 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  List<String> people = [
-    'Colton',
-    'Yandhile',
-    'Micheal',
-    'John',
-    'Doe',
-    'Jane',
-    'Blessing',
-    'Grace',
-    'Micheal',
-    'Mpilo',
-    'Micheal',
-  ];
+  final ChatsService _chatService = ChatsService();
+  List<dynamic> chats = [];
+  String username = '';
+  bool isLoading = true;
+
+  Future<void> fetchChats() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final savedUsername = prefs.getString('username') ?? '';
+      final secret = prefs.getString('secret') ?? '';
+
+      setState(() {
+        username = savedUsername;
+      });
+
+      if (savedUsername.isNotEmpty && secret.isNotEmpty) {
+        final fetchedChats = await _chatService.getChats(
+          username: savedUsername,
+          secret: secret,
+        );
+
+        setState(() {
+          chats = fetchedChats;
+          isLoading = false;
+        });
+      } else {
+        print('User credentials are missing in SharedPreferences.');
+        setState(() {
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      print('Error loading chats: $e');
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchChats();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        elevation: 0,
         backgroundColor: Colors.white,
-        appBar: AppBar(
-          elevation: 0,
-          backgroundColor: Colors.white,
-          centerTitle: false,
-            leading: IconButton(
-            icon: Icon(Icons.arrow_back),
-            onPressed: () {
-              Navigator.pop(context);
-            },
-          ),
-          title: const Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Hello Yandhile',
-                style: TextStyle(
-                  color: Colors.grey,
-                  fontWeight: FontWeight.w300,
-                  fontSize: 12,
-                ),
+        centerTitle: false,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Hello $username',
+              style: const TextStyle(
+                color: Colors.grey,
+                fontWeight: FontWeight.w300,
+                fontSize: 12,
               ),
-              Text(
-                'Chatsta',
-                style: TextStyle(
-                  color: Colors.black,
-                ),
+            ),
+            const Text(
+              'Chatsta',
+              style: TextStyle(
+                color: Colors.black,
               ),
-            ],
-          ),
-          actions: [
-            Padding(
-              padding: const EdgeInsets.only(right: 8.0),
-              child: IconButton(
-                onPressed: () {
-                    Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute<void>(
-                      builder: (BuildContext context) => const UsersScreen(),
-                    ),
-                  );
-                },
-                icon: const Icon(
-                  Icons.add,
-                  // CupertinoIcons.pencil_circle_fill,
-                  color: Colors.grey,
-                ),
-              ),
-            )
+            ),
           ],
         ),
-        body: SingleChildScrollView(
-          child: Column(
-            children: [
-              SizedBox(
-                height: 100,
-                child: ListView.builder(
-                    itemCount: people.length,
-                    shrinkWrap: true,
-                    scrollDirection: Axis.horizontal,
-                    itemBuilder: (context, int i) {
-                      return Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              height: 60,
-                              width: 60,
-                              decoration: BoxDecoration(
-                                color: Colors.grey.shade200,
-                                image: DecorationImage(
-                                  image: AssetImage(
-                                    'assets/${i + 1}.png',
-                                  ),
-                                  scale: 10,
-                                ),
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              people[i],
-                            ),
-                          ],
-                        ),
-                      );
-                    }),
-              ),
-              const Divider(),
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: people.length,
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: ListTile(
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute<void>(
+                builder: (BuildContext context) {
+                  return const UsersScreen();
+                },
+              ));
+            },
+            icon: const Icon(Icons.add, color: Colors.grey),
+          ),
+        ],
+      ),
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : chats.isEmpty
+              ? const Center(child: Text('No chats available.'))
+              : ListView.builder(
+                  itemCount: chats.length,
+                  itemBuilder: (context, index) {
+                    final chat = chats[index];
+                    final chatTitle = chat['title'] ?? 'No Title';
+                    final admin = chat['admin']['username'];
+                    final randomAvatar =
+                        'assets/${Random().nextInt(10) + 1}.png';
+
+                    return ListTile(
+                      leading: CircleAvatar(
+                        backgroundImage: AssetImage(randomAvatar),
+                      ),
+                      title: Text(chatTitle),
+                      subtitle: Text('Admin: $admin'),
                       onTap: () {
                         Navigator.push(
-                            context,
-                            MaterialPageRoute<void>(
-                              builder: (BuildContext context) =>
-                                  ChatDetailsScreen(
-                                index + 1,
-                                people[index],
-                              ),
-                            ));
-                      },
-                      leading: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade200,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(6.0),
-                          child: Image.asset(
-                            'assets/${index + 1}.png',
-                          ),
-                        ),
-                      ),
-                      title: Text(
-                        people[index],
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      subtitle: const Text(
-                        "Hey, how are you doing? I'm just checking up on you. 🔥",
-                      ),
-                      trailing: Column(
-                        children: [
-                          const Text(
-                            '00:01',
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: Colors.grey,
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ChatDetailsScreen(
+                              chatId: chat['id'] ?? '',
+                              chatName: chatTitle,
                             ),
                           ),
-                          const SizedBox(height: 5),
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(
-                                CupertinoIcons.pin_fill,
-                                size: 15,
-                                color: Colors.grey,
-                              ),
-                              const SizedBox(width: 5),
-                              Container(
-                                height: 15,
-                                width: 15,
-                                decoration: const BoxDecoration(
-                                  color: Colors.blue,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Center(
-                                  child: Text(
-                                    '1',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 9,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          )
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              )
-            ],
-          ),
-        ));
+                        );
+                      },
+                    );
+                  },
+                ),
+    );
   }
 }
