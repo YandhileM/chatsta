@@ -122,11 +122,13 @@ class _HomeScreenState extends State<HomeScreen> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => ChatDetailsScreen(
-                              chatId: chat['id'] ?? '',
+                              chatId: chat['id']?.toString() ??
+                                  '', 
                               chatName: chatTitle,
                             ),
                           ),
                         );
+
                       },
                     );
                   },
