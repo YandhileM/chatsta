@@ -2,10 +2,8 @@ import 'package:chatsta/features/auth/presentation/screens/auth/components/text_
 import 'package:chatsta/features/auth/presentation/screens/home_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../../data/services/auth_service.dart';
-// import 'package:chatsta/features/auth/presentation/screens/Users/user_screen.dart';
-
-
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -43,6 +41,12 @@ class _SignInScreenState extends State<SignInScreen> {
     );
   }
 
+  Future<void> saveCredentials(String username, String secret) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('username', username);
+    await prefs.setString('secret', secret);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -57,17 +61,18 @@ class _SignInScreenState extends State<SignInScreen> {
                 width: MediaQuery.of(context).size.width * 0.9,
                 child: MyTextField(
                   controller: emailController,
-                  hintText: 'Email',
+                  hintText: 'Username',
                   obscureText: false,
                   keyboardType: TextInputType.emailAddress,
                   prefixIcon: const Icon(CupertinoIcons.mail_solid),
                   validator: (val) {
                     if (val!.isEmpty) {
                       return 'Please fill in this field';
-                    } else if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}\$')
-                        .hasMatch(val)) {
-                      return 'Please enter a valid email';
-                    }
+                    } 
+                    // else if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                    //     .hasMatch(val)) {
+                    //   return 'Please enter a valid email';
+                    // }
                     return null;
                   },
                 ),
@@ -85,7 +90,7 @@ class _SignInScreenState extends State<SignInScreen> {
                     if (val!.isEmpty) {
                       return 'Please fill in this field';
                     } else if (!RegExp(
-                            r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$&*~`\)\%\-(_+=;:,.<>/?"[\{\]}\\|^]).{8,}\$')
+                            r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$&*~`\)\%\-(_+=;:,.<>/?"[\{\]}\\|^]).{8,}$')
                         .hasMatch(val)) {
                       return 'Please enter a valid password';
                     }
@@ -111,14 +116,14 @@ class _SignInScreenState extends State<SignInScreen> {
                   onPressed: isLoading
                       ? null
                       : () async {
-                          // if (_formKey.currentState!.validate()) {
+                          if (_formKey.currentState!.validate()) {
                             setState(() {
                               isLoading = true;
                             });
 
                             final success = await _authService.signIn(
-                              username: emailController.text,
-                              secret: passwordController.text,
+                              username: emailController.text.trim(),
+                              secret: passwordController.text.trim(),
                             );
 
                             if (mounted) {
@@ -127,6 +132,13 @@ class _SignInScreenState extends State<SignInScreen> {
                               });
 
                               if (success) {
+                                // Save credentials to SharedPreferences
+                                await saveCredentials(
+                                  emailController.text.trim(),
+                                  passwordController.text.trim(),
+                                );
+
+                                // Navigate to HomeScreen
                                 Navigator.pushReplacement(
                                   context,
                                   MaterialPageRoute<void>(
@@ -139,7 +151,7 @@ class _SignInScreenState extends State<SignInScreen> {
                                     'Invalid credentials. Please try again.');
                               }
                             }
-                          // }
+                          }
                         },
                   style: TextButton.styleFrom(
                     elevation: 3.0,
