@@ -92,40 +92,40 @@ class ChatsService {
   }
 
   /// Sends a message to a specific chat.
-  Future<bool> sendMessage({
-    required String username,
-    required String secret,
-    required int chatId,
-    required String messageText,
-    List<Map<String, dynamic>>? attachments,
-  }) async {
-    try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/chats/$chatId/messages/'),
-        headers: {
-          'Project-ID': projectId,
-          'User-Name': username,
-          'User-Secret': secret,
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-          'text': messageText,
-          'attachments': attachments ?? [],
-        }),
-      );
+  // Future<bool> sendMessage({
+  //   required String username,
+  //   required String secret,
+  //   required int chatId,
+  //   required String messageText,
+  //   List<Map<String, dynamic>>? attachments,
+  // }) async {
+  //   try {
+  //     final response = await http.post(
+  //       Uri.parse('$baseUrl/chats/$chatId/messages/'),
+  //       headers: {
+  //         'Project-ID': projectId,
+  //         'User-Name': username,
+  //         'User-Secret': secret,
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: jsonEncode({
+  //         'text': messageText,
+  //         'attachments': attachments ?? [],
+  //       }),
+  //     );
 
-      if (response.statusCode == 201) {
-        return true;
-      } else {
-        print('Send message failed with status code: ${response.statusCode}');
-        print('Response body: ${response.body}');
-        return false;
-      }
-    } catch (e) {
-      print('Error sending message: $e');
-      return false;
-    }
-  }
+  //     if (response.statusCode == 201) {
+  //       return true;
+  //     } else {
+  //       print('Send message failed with status code: ${response.statusCode}');
+  //       print('Response body: ${response.body}');
+  //       return false;
+  //     }
+  //   } catch (e) {
+  //     print('Error sending message: $e');
+  //     return false;
+  //   }
+  // }
    Future<List<Map<String, dynamic>>> getChatMessages({
     required String chatId,
     required String username,
@@ -189,5 +189,39 @@ class ChatsService {
       return null;
     }
   }
+  /// Sends a text message to a specific chat.
+Future<bool> sendMessage({
+  required String username,
+  required String secret,
+  required String chatId,
+  required String messageText,
+}) async {
+  try {
+    final response = await http.post(
+      Uri.parse('$baseUrl/chats/$chatId/messages/'),
+      headers: {
+        'Project-ID': projectId,
+        'User-Name': username,
+        'User-Secret': secret,
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'text': messageText,
+      }),
+    );
+
+    if (response.statusCode == 201) {
+      return true;
+    } else {
+      print('Send message failed with status code: ${response.statusCode}');
+      print('Response body: ${response.body}');
+      return false;
+    }
+  } catch (e) {
+    print('Error sending message: $e');
+    return false;
+  }
+}
+
 
 }
