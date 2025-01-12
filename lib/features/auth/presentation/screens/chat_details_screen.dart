@@ -1,28 +1,85 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../../../data/services/chat_service.dart';
+import 'package:intl/intl.dart'; // Add this import for date formatting
 
 class ChatDetailsScreen extends StatefulWidget {
-  final int index;
-  final String name;
-  const ChatDetailsScreen(this.index, this.name, {super.key});
+  final String chatId;
+  final String chatName;
+
+  const ChatDetailsScreen({
+    super.key,
+    required this.chatId,
+    required this.chatName,
+  });
 
   @override
   State<ChatDetailsScreen> createState() => _ChatDetailsScreenState();
 }
 
 class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
-  List<String> messages = [
-    "Hello",
-    "How are you?",
-    "I am fine",
-    "What are you doing?",
-    "I am working on a project right now. How about you?",
-    "That's great. I am also working on a project",
-    "I will call you later",
-  ];
-
+  final ChatsService _chatService = ChatsService();
+  List<Map<String, dynamic>> messages = [];
   final TextEditingController _controller = TextEditingController();
   String message = "";
+  bool isLoading = true;
+  String? currentUsername;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchChatMessages();
+    _getCurrentUsername();
+  }
+
+  String formatDateTime(String dateTimeString) {
+    try {
+      // Parse the UTC datetime string
+      DateTime dateTime = DateTime.parse(dateTimeString);
+
+      // Format the date and time
+      return DateFormat('yyyy/MM/dd HH:mm').format(dateTime.toLocal());
+    } catch (e) {
+      print('Error formatting date: $e');
+      return dateTimeString; // Return original string if parsing fails
+    }
+  }
+
+  Future<void> _getCurrentUsername() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      currentUsername = prefs.getString('username');
+    });
+  }
+
+  Future<void> fetchChatMessages() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final username = prefs.getString('username');
+      final secret = prefs.getString('secret');
+
+      if (username != null && secret != null) {
+        final fetchedMessages = await _chatService.getChatMessages(
+          chatId: widget.chatId,
+          username: username,
+          secret: secret,
+        );
+
+        setState(() {
+          messages = fetchedMessages;
+          isLoading = false;
+        });
+      } else {
+        print('User credentials are missing in SharedPreferences.');
+      }
+    } catch (e) {
+      print('Error loading messages: $e');
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,77 +97,39 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
             color: Colors.black,
           ),
         ),
-        title: Row(
-          children: [
-            Container(
-              width: kToolbarHeight - 10,
-              height: kToolbarHeight - 10,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade200,
-                shape: BoxShape.circle,
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(6.0),
-                child: Image.asset(
-                  'assets/${widget.index}.png',
-                ),
-              ),
-            ),
-            const SizedBox(width: 10),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  widget.name,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                const Text(
-                  'Online',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w300,
-                    color: Colors.green,
-                    fontSize: 12,
-                  ),
-                )
-              ],
-            ),
-          ],
+        title: Text(
+          widget.chatName,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
         ),
-        actions: const [
-          Icon(
-            CupertinoIcons.video_camera,
-            color: Colors.black,
-            size: 30,
-          ),
-          SizedBox(width: 10),
-          Icon(
-            CupertinoIcons.phone,
-            color: Colors.black,
-            size: 30,
-          ),
-          SizedBox(width: 10),
-        ],
       ),
       body: Column(
         children: [
           Expanded(
-            child: ListView.builder(
-              itemCount: messages.length,
-              itemBuilder: (context, int i) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16.0,
-                    vertical: 8,
-                  ),
-                  child: i.isEven
-                      ? Align(
-                          alignment: Alignment.topLeft,
+            child: isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : ListView.builder(
+                    itemCount: messages.length,
+                    itemBuilder: (context, int i) {
+                      final message = messages[i];
+                      final isSentByUser =
+                          message['sender_username'] == currentUsername;
+
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0,
+                          vertical: 8,
+                        ),
+                        child: Align(
+                          alignment: isSentByUser
+                              ? Alignment.centerRight
+                              : Alignment.centerLeft,
                           child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                            crossAxisAlignment: isSentByUser
+                                ? CrossAxisAlignment.end
+                                : CrossAxisAlignment.start,
                             children: [
                               Container(
                                 constraints: BoxConstraints(
@@ -118,56 +137,30 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
                                       MediaQuery.of(context).size.width * 0.7,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(16.0),
-                                  child: Text(messages[i]),
-                                ),
-                              ),
-                              const Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child: Text(
-                                  "12:00",
-                                  style: TextStyle(
-                                    color: Colors.grey,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        )
-                      : Align(
-                          alignment: Alignment.topRight,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Container(
-                                constraints: BoxConstraints(
-                                  maxWidth:
-                                      MediaQuery.of(context).size.width * 0.7,
-                                ),
-                                // width: MediaQuery.of(context).size.width * 0.7,
-                                decoration: BoxDecoration(
-                                  color: Colors.blue,
+                                  color:
+                                      isSentByUser ? Colors.blue : Colors.white,
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Padding(
                                   padding: const EdgeInsets.all(16.0),
                                   child: Text(
-                                    messages[i],
-                                    textAlign: TextAlign.end,
-                                    style: const TextStyle(color: Colors.white),
+                                    message['text'] ?? '',
+                                    textAlign: isSentByUser
+                                        ? TextAlign.end
+                                        : TextAlign.start,
+                                    style: TextStyle(
+                                      color: isSentByUser
+                                          ? Colors.white
+                                          : Colors.black,
+                                    ),
                                   ),
                                 ),
                               ),
-                              const Padding(
-                                padding: EdgeInsets.all(8.0),
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
                                 child: Text(
-                                  "12:00",
-                                  style: TextStyle(
+                                  formatDateTime(message['created'] ?? ''),
+                                  style: const TextStyle(
                                     color: Colors.grey,
                                     fontSize: 12,
                                   ),
@@ -176,14 +169,13 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
                             ],
                           ),
                         ),
-                );
-              },
-            ),
+                      );
+                    },
+                  ),
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, kToolbarHeight),
             child: Container(
-              // width: MediaQuery.of(context).size.width * 0.7,
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(100),
@@ -195,18 +187,16 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
                 ),
                 child: Row(
                   children: [
-                    const Icon(
-                      CupertinoIcons.paperclip,
-                    ),
+                    const Icon(CupertinoIcons.paperclip),
                     const SizedBox(width: 20),
                     Expanded(
                       child: TextField(
                         controller: _controller,
-                        onChanged: ((value) {
+                        onChanged: (value) {
                           setState(() {
                             message = value;
                           });
-                        }),
+                        },
                         decoration: const InputDecoration(
                           hintText: "Type message...",
                           border: InputBorder.none,
@@ -215,43 +205,58 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
                     ),
                     const SizedBox(width: 20),
                     message.isEmpty
-                        ? Container(
-                            width: 50,
-                            height: 50,
-                            decoration: const BoxDecoration(
-                              color: Colors.blue,
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              CupertinoIcons.mic,
-                              color: Colors.white,
-                            ),
+                        ? const CircleAvatar(
+                            backgroundColor: Colors.blue,
+                            child:
+                                Icon(CupertinoIcons.mic, color: Colors.white),
                           )
-                        : GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                messages.add(message);
-                                _controller.clear();
-                              });
-                            },
-                            child: Container(
-                              width: 50,
-                              height: 50,
-                              decoration: const BoxDecoration(
-                                color: Colors.blue,
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                CupertinoIcons.paperplane,
-                                color: Colors.white,
+                        : Container(
+                            width: 40,
+                            height: 40,
+                            child: GestureDetector(
+                              onTap: () async {
+                                if (message.isNotEmpty) {
+                                  final prefs =
+                                      await SharedPreferences.getInstance();
+                                  final username = prefs.getString('username')!;
+                                  final secret = prefs.getString('secret')!;
+
+                                  final success =
+                                      await _chatService.sendMessage(
+                                    username: username,
+                                    secret: secret,
+                                    chatId: widget.chatId,
+                                    messageText: message,
+                                  );
+
+                                  if (success) {
+                                    setState(() {
+                                      messages.add({
+                                        'text': message,
+                                        'sender_username': currentUsername,
+                                        'created':
+                                            DateTime.now().toUtc().toString(),
+                                      });
+                                      _controller.clear();
+                                      message = '';
+                                    });
+                                  } else {
+                                    print('Failed to send the message.');
+                                  }
+                                }
+                              },
+                              child: const CircleAvatar(
+                                backgroundColor: Colors.blue,
+                                child: Icon(CupertinoIcons.arrow_up,
+                                    color: Colors.white),
                               ),
                             ),
-                          )
+                          ),
                   ],
                 ),
               ),
             ),
-          )
+          ),
         ],
       ),
     );
