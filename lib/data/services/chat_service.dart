@@ -223,5 +223,35 @@ Future<bool> sendMessage({
   }
 }
 
+/// Fetches the latest `chatCount` messages from the chat with the specified `chatId`.
+  Future<List<Map<String, dynamic>>> fetchLatestMessages({
+    required String chatId,
+    required String username,
+    required String secret,
+    required int chatCount,
+  }) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/chats/$chatId/messages/latest/$chatCount/'),
+        headers: {
+          'Project-ID': projectId,
+          'User-Name': username,
+          'User-Secret': secret,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return List<Map<String, dynamic>>.from(json.decode(response.body));
+      } else {
+        print(
+            'Fetch latest messages failed with status code: ${response.statusCode}');
+        print('Response body: ${response.body}');
+        return [];
+      }
+    } catch (e) {
+      print('Error fetching latest messages: $e');
+      return [];
+    }
+  }
 
 }
