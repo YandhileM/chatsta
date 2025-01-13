@@ -1,9 +1,68 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import '../../../../../data/services/user_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../chat_details_screen.dart';
+import '../../../../../data/services/chat_service.dart';
 
+// Chat Name Dialog Widget
+class ChatNameDialog extends StatefulWidget {
+  final String defaultName;
 
+  const ChatNameDialog({
+    super.key,
+    required this.defaultName,
+  });
+
+  @override
+  State<ChatNameDialog> createState() => _ChatNameDialogState();
+}
+
+class _ChatNameDialogState extends State<ChatNameDialog> {
+  late TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.defaultName);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Name your chat'),
+      content: TextField(
+        controller: _controller,
+        decoration: const InputDecoration(
+          hintText: "Enter chat name",
+        ),
+        autofocus: true,
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: const Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop(_controller.text);
+          },
+          child: const Text('Create'),
+        ),
+      ],
+    );
+  }
+}
+
+// Main Users Screen
 class UsersScreen extends StatefulWidget {
   const UsersScreen({super.key});
 
@@ -13,19 +72,117 @@ class UsersScreen extends StatefulWidget {
 
 class _UsersScreenState extends State<UsersScreen> {
   final UserService _userService = UserService();
+  final ChatsService _chatService = ChatsService();
   late Future<List<Map<String, dynamic>>> _futureUsers;
   final Random _random = Random();
 
   @override
   void initState() {
     super.initState();
-    _futureUsers = _userService.fetchUsers();
+    _futureUsers = _fetchFilteredUsers();
+  }
+
+  Future<List<Map<String, dynamic>>> _fetchFilteredUsers() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final currentUsername = prefs.getString('username');
+      final secret = prefs.getString('secret');
+
+      if (currentUsername == null || secret == null) {
+        throw Exception('User credentials not found');
+      }
+
+      // Fetch all users
+      final allUsers = await _userService.fetchUsers();
+
+      // Fetch existing chats
+      final existingChats = await _chatService.fetchChats(
+        username: currentUsername,
+        secret: secret,
+      );
+
+      // Extract usernames of users already in chats
+      final usernamesInChats = existingChats
+              ?.expand((chat) => (chat['people'] as List<dynamic>)
+                  .map((person) => person['person']['username']))
+              .toSet() ??
+          {};
+
+      // Filter users: Exclude logged-in user and already-added users
+      final filteredUsers = allUsers
+          .where((user) =>
+              user['username'] != currentUsername &&
+              !usernamesInChats.contains(user['username']))
+          .toList();
+
+      return filteredUsers;
+    } catch (e) {
+      print('Error fetching users or chats: $e');
+      return [];
+    }
   }
 
   String getRandomAsset() {
-    // Generate a random asset file name from 1.png to 10.png
     int assetNumber = _random.nextInt(20) + 1;
     return 'assets/$assetNumber.png';
+  }
+
+  Future<void> _createChat(Map<String, dynamic> selectedUser) async {
+    // Show dialog to get chat name
+    final String? chatName = await showDialog<String>(
+      context: context,
+      builder: (BuildContext context) {
+        return ChatNameDialog(
+          defaultName:
+              "Chat with ${selectedUser['first_name']} ${selectedUser['last_name']}",
+        );
+      },
+    );
+
+    // If user cancels, return early
+    if (chatName == null) return;
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final currentUsername = prefs.getString('username');
+      final secret = prefs.getString('secret');
+
+      if (currentUsername == null || secret == null) {
+        throw Exception('User credentials not found');
+      }
+
+      final response = await _chatService.createChat(
+        username: currentUsername,
+        secret: secret,
+        usernames: [selectedUser['username']],
+        title: chatName, // Use the user-provided chat name
+        isDirectChat: true,
+      );
+
+      if (response != null && response['id'] != null) {
+        await prefs.setString('chatId', response['id'].toString());
+      } else {
+        throw Exception('Failed to create chat: Invalid response');
+      }
+
+      if (mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ChatDetailsScreen(
+              chatId: response['id'].toString(),
+              chatName: chatName, // Use the user-provided chat name
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to create chat: $e')),
+        );
+      }
+    }
   }
 
   @override
@@ -40,7 +197,7 @@ class _UsersScreenState extends State<UsersScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Hello User',
+              'Hello',
               style: TextStyle(
                 color: Colors.grey,
                 fontWeight: FontWeight.w300,
@@ -94,9 +251,7 @@ class _UsersScreenState extends State<UsersScreen> {
                       return Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: ListTile(
-                          onTap: () {
-                            // Handle navigation to user details or chat
-                          },
+                          onTap: () {},
                           leading: Container(
                             height: 50,
                             width: 50,
@@ -116,7 +271,10 @@ class _UsersScreenState extends State<UsersScreen> {
                             ),
                           ),
                           subtitle: Text(user['username']),
-                          trailing: const Icon(Icons.add),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.add),
+                            onPressed: () => _createChat(user),
+                          ),
                         ),
                       );
                     },
