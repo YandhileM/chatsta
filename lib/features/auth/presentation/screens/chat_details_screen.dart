@@ -1,8 +1,9 @@
+import 'dart:async'; // For Timer
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../data/services/chat_service.dart';
-import 'package:intl/intl.dart'; // Add this import for date formatting
+import 'package:intl/intl.dart'; // For date formatting
 
 class ChatDetailsScreen extends StatefulWidget {
   final String chatId;
@@ -25,24 +26,38 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
   String message = "";
   bool isLoading = true;
   String? currentUsername;
+  Timer? pollingTimer;
+
+Timer? _pollingTimer;
 
   @override
   void initState() {
     super.initState();
     fetchChatMessages();
-    _getCurrentUsername();
+    _getCurrentUsername(); 
+    _startPolling();
   }
+
+  void _startPolling() {
+    _pollingTimer = Timer.periodic(const Duration(seconds: 2), (timer) {
+      pollLatestMessages();
+    });
+  }
+
+  @override
+  void dispose() {
+    _pollingTimer?.cancel(); // Stop polling when leaving the screen
+    super.dispose();
+  }
+
 
   String formatDateTime(String dateTimeString) {
     try {
-      // Parse the UTC datetime string
       DateTime dateTime = DateTime.parse(dateTimeString);
-
-      // Format the date and time
       return DateFormat('yyyy/MM/dd HH:mm').format(dateTime.toLocal());
     } catch (e) {
       print('Error formatting date: $e');
-      return dateTimeString; // Return original string if parsing fails
+      return dateTimeString;
     }
   }
 
@@ -67,7 +82,7 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
         );
 
         setState(() {
-          messages = fetchedMessages;
+          messages = _mergeMessages(messages, fetchedMessages);
           isLoading = false;
         });
       } else {
@@ -79,6 +94,52 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
         isLoading = false;
       });
     }
+  }
+
+  Future<void> pollLatestMessages() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final username = prefs.getString('username');
+      final secret = prefs.getString('secret');
+
+      if (username != null && secret != null) {
+        // Fetch the latest messages
+        final latestMessages = await _chatService.fetchLatestMessages(
+          chatId: widget.chatId,
+          username: username,
+          secret: secret,
+          chatCount: 1, 
+        );
+
+        setState(() {
+          // Avoid duplicates by filtering out messages already in the list
+          final existingMessageIds = messages.map((m) => m['id']).toSet();
+          final newMessages = latestMessages.where((message) {
+            return !existingMessageIds.contains(message['id']);
+          }).toList();
+
+          // Add new messages to the list
+          messages.insertAll(
+              0, newMessages); // Insert at the top (most recent first)
+        });
+      }
+    } catch (e) {
+      print('Error polling latest messages: $e');
+    }
+  }
+
+
+  List<Map<String, dynamic>> _mergeMessages(
+    List<Map<String, dynamic>> existingMessages,
+    List<Map<String, dynamic>> newMessages,
+  ) {
+    final existingIds = existingMessages.map((m) => m['id']).toSet();
+    final merged = [
+      ...existingMessages,
+      ...newMessages.where((msg) => !existingIds.contains(msg['id'])),
+    ];
+    merged.sort((a, b) => a['created'].compareTo(b['created']));
+    return merged;
   }
 
   @override
@@ -210,46 +271,44 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
                             child:
                                 Icon(CupertinoIcons.mic, color: Colors.white),
                           )
-                        : Container(
-                            width: 40,
-                            height: 40,
-                            child: GestureDetector(
-                              onTap: () async {
-                                if (message.isNotEmpty) {
-                                  final prefs =
-                                      await SharedPreferences.getInstance();
-                                  final username = prefs.getString('username')!;
-                                  final secret = prefs.getString('secret')!;
+                        : GestureDetector(
+                            onTap: () async {
+                              if (message.isNotEmpty) {
+                                final prefs =
+                                    await SharedPreferences.getInstance();
+                                final username = prefs.getString('username')!;
+                                final secret = prefs.getString('secret')!;
 
-                                  final success =
-                                      await _chatService.sendMessage(
-                                    username: username,
-                                    secret: secret,
-                                    chatId: widget.chatId,
-                                    messageText: message,
-                                  );
+                                final success = await _chatService.sendMessage(
+                                  username: username,
+                                  secret: secret,
+                                  chatId: widget.chatId,
+                                  messageText: message,
+                                );
 
-                                  if (success) {
-                                    setState(() {
-                                      messages.add({
-                                        'text': message,
-                                        'sender_username': currentUsername,
-                                        'created':
-                                            DateTime.now().toUtc().toString(),
-                                      });
-                                      _controller.clear();
-                                      message = '';
+                                if (success) {
+                                  setState(() {
+                                    messages.add({
+                                      'id': DateTime.now()
+                                          .millisecondsSinceEpoch
+                                          .toString(),
+                                      'text': message,
+                                      'sender_username': currentUsername,
+                                      'created':
+                                          DateTime.now().toUtc().toString(),
                                     });
-                                  } else {
-                                    print('Failed to send the message.');
-                                  }
+                                    _controller.clear();
+                                    message = '';
+                                  });
+                                } else {
+                                  print('Failed to send the message.');
                                 }
-                              },
-                              child: const CircleAvatar(
-                                backgroundColor: Colors.blue,
-                                child: Icon(CupertinoIcons.arrow_up,
-                                    color: Colors.white),
-                              ),
+                              }
+                            },
+                            child: const CircleAvatar(
+                              backgroundColor: Colors.blue,
+                              child: Icon(CupertinoIcons.arrow_up,
+                                  color: Colors.white),
                             ),
                           ),
                   ],
