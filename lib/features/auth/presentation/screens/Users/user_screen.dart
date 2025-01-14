@@ -127,7 +127,7 @@ class _UsersScreenState extends State<UsersScreen> {
     return 'assets/$assetNumber.png';
   }
 
-  Future<void> _createChat(Map<String, dynamic> selectedUser) async {
+ Future<void> _createChat(Map<String, dynamic> selectedUser) async {
     // Show dialog to get chat name
     final String? chatName = await showDialog<String>(
       context: context,
@@ -151,30 +151,30 @@ class _UsersScreenState extends State<UsersScreen> {
         throw Exception('User credentials not found');
       }
 
-      final response = await _chatService.createChat(
+      // Use getOrCreateChat instead of createChat
+      final response = await _chatService.getOrCreateChat(
         username: currentUsername,
         secret: secret,
         usernames: [selectedUser['username']],
-        title: chatName, // Use the user-provided chat name
+        title: chatName,
         isDirectChat: true,
       );
 
       if (response != null && response['id'] != null) {
-        await prefs.setString('chatId', response['id'].toString());
-      } else {
-        throw Exception('Failed to create chat: Invalid response');
-      }
+        if (!mounted) return;
 
-      if (mounted) {
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => ChatDetailsScreen(
               chatId: response['id'].toString(),
-              chatName: chatName, // Use the user-provided chat name
+              chatName: chatName,
+              accessKey: response['access_key'], 
             ),
           ),
         );
+      } else {
+        throw Exception('Failed to create chat: Invalid response');
       }
     } catch (e) {
       if (mounted) {
