@@ -20,6 +20,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String username = '';
   bool isLoading = true;
   final Map<String, String> typingUsers = {};
+  
 
   @override
   void dispose() {
@@ -135,6 +136,44 @@ class _HomeScreenState extends State<HomeScreen> {
       },
     );
   }
+  // Future<void> _handleChatTap(Map<String, dynamic> chat) async {
+  //   try {
+  //     final prefs = await SharedPreferences.getInstance();
+  //     final username = prefs.getString('username');
+  //     final secret = prefs.getString('secret');
+
+  //     if (username != null && secret != null) {
+  //       // Extract usernames from people list
+  //       final usernames = (chat['people'] as List<dynamic>)
+  //           .map((person) => person['person']['username'] as String)
+  //           .toList();
+
+  //       final result = await _chatService.getOrCreateChat(
+  //         username: username,
+  //         secret: secret,
+  //         usernames: usernames,
+  //         title: chat['title'] ?? '',
+  //         isDirectChat: chat['is_direct_chat'] ?? false,
+  //       );
+
+  //       // Navigate to chat details with the new data
+  //       if (!mounted) return;
+  //       Navigator.push(
+  //         context,
+  //         MaterialPageRoute(
+  //           builder: (context) => ChatDetailsScreen(
+  //             chatId: result['id'].toString(),
+  //             chatName: result['title'],
+  //             accessKey: result['access_key'],
+  //           ),
+  //         ),
+  //       );
+  //     }
+  //   } catch (e) {
+  //     print('Error handling chat tap: $e');
+  //     // You might want to show an error message to the user here
+  //   }
+  // }
 
   @override
   void initState() {
@@ -205,6 +244,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     final randomAvatar =
                         'assets/${Random().nextInt(10) + 1}.png';
                     final isTyping = typingUsers.containsKey(chatId);
+                    
 
                     return ListTile(
                       leading: CircleAvatar(
@@ -224,20 +264,48 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                             )
                           : Text(
-                              lastMessage,
+                              lastMessage ,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ChatDetailsScreen(
-                              chatId: chatId,
-                              chatName: chatTitle,
-                            ),
-                          ),
-                        );
+onTap: () async {
+                        try {
+                          final prefs = await SharedPreferences.getInstance();
+                          final username = prefs.getString('username');
+                          final secret = prefs.getString('secret');
+
+                          if (username != null && secret != null) {
+                            // Extract usernames from people list
+                            final usernames = (chat['people'] as List<dynamic>)
+                                .map((person) =>
+                                    person['person']['username'].toString())
+                                .toList();
+
+                            final result = await _chatService.getOrCreateChat(
+                              username: username,
+                              secret: secret,
+                              usernames: usernames,
+                              title: chat['title'] ?? '',
+                              isDirectChat: chat['is_direct_chat'] ?? false,
+                            );
+
+                            if (result != null) {
+                              if (!context.mounted) return;
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ChatDetailsScreen(
+                                    chatId: result['id'].toString(),
+                                    chatName: result['title'],
+                                    accessKey: result['access_key'],
+                                  ),
+                                ),
+                              );
+                            }
+                          }
+                        } catch (e) {
+                          print('Error navigating to chat: $e');
+                        }
                       },
                     );
                     
