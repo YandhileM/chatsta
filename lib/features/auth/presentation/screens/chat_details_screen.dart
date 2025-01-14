@@ -8,11 +8,13 @@ import 'package:intl/intl.dart'; // For date formatting
 class ChatDetailsScreen extends StatefulWidget {
   final String chatId;
   final String chatName;
+  final String accessKey;
 
   const ChatDetailsScreen({
     super.key,
     required this.chatId,
     required this.chatName,
+    required this.accessKey,
   });
 
   @override
@@ -28,13 +30,13 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
   String? currentUsername;
   Timer? pollingTimer;
 
-Timer? _pollingTimer;
+  Timer? _pollingTimer;
 
   @override
   void initState() {
     super.initState();
     fetchChatMessages();
-    _getCurrentUsername(); 
+    _getCurrentUsername();
     _startPolling();
   }
 
@@ -46,10 +48,9 @@ Timer? _pollingTimer;
 
   @override
   void dispose() {
-    _pollingTimer?.cancel(); // Stop polling when leaving the screen
+    _pollingTimer?.cancel(); 
     super.dispose();
   }
-
 
   String formatDateTime(String dateTimeString) {
     try {
@@ -108,7 +109,7 @@ Timer? _pollingTimer;
           chatId: widget.chatId,
           username: username,
           secret: secret,
-          chatCount: 1, 
+          chatCount: 1,
         );
 
         setState(() {
@@ -127,7 +128,6 @@ Timer? _pollingTimer;
       print('Error polling latest messages: $e');
     }
   }
-
 
   List<Map<String, dynamic>> _mergeMessages(
     List<Map<String, dynamic>> existingMessages,
