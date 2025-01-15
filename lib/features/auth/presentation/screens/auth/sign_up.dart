@@ -1,8 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import '../home_screen.dart';
+// import '../home_screen.dart';
 import 'components/text_field.dart';
 import '../../../../../data/services/auth_service.dart';
+import '../Users/user_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -43,9 +45,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
       containsLowerCase = password.contains(RegExp(r'[a-z]'));
       containsNumber = password.contains(RegExp(r'[0-9]'));
       containsSpecialChar =
-          password.contains(RegExp(r'[!@#\$&*~`)\%\-(_+=;:,.<>/?"[\{\]}\\|^]'));
+          password.contains(RegExp(r'[!@#$&*~`%)(_+=;:,.<>/?"{}\[\]\\|^-]'));
       contains8Length = password.length >= 8;
     });
+  }
+    Future<void> _saveCredentials(String username, String secret) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('username', username);
+    await prefs.setString('secret', secret);
   }
 
   void _signUp() async {
@@ -64,17 +71,23 @@ class _SignUpScreenState extends State<SignUpScreen> {
         );
 
         if (response) {
+          final username = usernameController.text.trim();
+          final secret = passwordController.text.trim();
+
+          // Save username and secret in SharedPreferences
+          await _saveCredentials(username, secret);
           if (mounted) {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => const HomeScreen()),
+              MaterialPageRoute(builder: (context) => const UsersScreen()),
             );
           }
         } else {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                  content: Text('Sign-up failed. Please try again.')),
+                content: Text('Sign-up failed. Please try again.'),
+              ),
             );
           }
         }
@@ -110,17 +123,22 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   width: MediaQuery.of(context).size.width * 0.9,
                   child: MyTextField(
                     controller: usernameController,
-                    hintText: 'Email',
+                    hintText: 'Username',
                     obscureText: false,
                     keyboardType: TextInputType.emailAddress,
                     prefixIcon: const Icon(CupertinoIcons.mail_solid),
                     validator: (val) {
                       if (val!.isEmpty) {
                         return 'Please fill in this field';
-                      } else if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}\$')
-                          .hasMatch(val)) {
-                        return 'Please enter a valid email';
                       }
+                      // bool emailValid = RegExp(
+                      //         r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
+                      //     .hasMatch(val);
+                      // print(
+                      //     'Email validation result: $emailValid for email: $val');
+                      // if (!emailValid) {
+                      //   return 'Please enter a valid email';
+                      // }
                       return null;
                     },
                   ),
@@ -149,9 +167,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     validator: (val) {
                       if (val!.isEmpty) {
                         return 'Please fill in this field';
-                      } else if (!RegExp(
-                              r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$&*~`\)\%\-(_+=;:,.<>/?"[\{\]}\\|^]).{8,}\$')
-                          .hasMatch(val)) {
+                      }
+                      bool passwordValid = containsUpperCase &&
+                          containsLowerCase &&
+                          containsNumber &&
+                          containsSpecialChar &&
+                          contains8Length;
+                      print(
+                          'Password validation result: $passwordValid for password: $val');
+                      if (!passwordValid) {
                         return 'Please enter a valid password';
                       }
                       return null;
