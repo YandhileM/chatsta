@@ -253,5 +253,40 @@ Future<bool> sendMessage({
       return [];
     }
   }
+  Future<Map<String, dynamic>?> getOrCreateChat({
+    required String username,
+    required String secret,
+    required List<String> usernames,
+    required String title,
+    bool isDirectChat = false,
+  }) async {
+    try {
+      final response = await http.put(
+        Uri.parse('$baseUrl/chats/'),
+        headers: {
+          'Project-ID': projectId,
+          'User-Name': username,
+          'User-Secret': secret,
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'usernames': usernames,
+          'title': title,
+          'is_direct_chat': isDirectChat,
+        }),
+      );
 
+      if (response.statusCode == 200) {
+        return json.decode(response.body) as Map<String, dynamic>;
+      } else {
+        print(
+            'Get or create chat failed with status code: ${response.statusCode}');
+        print('Response body: ${response.body}');
+        return null;
+      }
+    } catch (e) {
+      print('Error getting or creating chat: $e');
+      return null;
+    }
+  }
 }
