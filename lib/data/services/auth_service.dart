@@ -40,8 +40,9 @@ class AuthService {
         print('Response body: ${response.body}');
         return false;
       }
-    } catch (e) {
-      print('Error during sign up: $e');
+    } catch (e, stackTrace) {
+      print('Error during signup: $e');
+      print('Stack trace: $stackTrace');
       return false;
     }
   }
