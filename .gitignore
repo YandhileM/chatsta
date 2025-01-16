@@ -55,3 +55,7 @@ ios/Flutter/Flutter.framework.dSYM
 *.pid
 *.seed
 *.pid.lock
+
+# Keystore files
+android/app/*.jks
+android/key.properties

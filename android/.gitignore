@@ -1,13 +1,63 @@
-gradle-wrapper.jar
-/.gradle
-/captures/
-/gradlew
-/gradlew.bat
-/local.properties
-GeneratedPluginRegistrant.java
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
 
-# Remember to never publicly share your keystore.
-# See https://flutter.dev/to/reference-keystore
-key.properties
-**/*.keystore
-**/*.jks
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# VS Code related
+.vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+build/
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Environment files
+.env
+
+# Android Studio will place build artifacts here
+android/app/debug/
+android/app/profile/
+android/app/release/
+
+# iOS related
+ios/Pods/
+ios/Flutter/Flutter.framework.dSYM
+
+# Generated files
+*.log
+*.lock
+*.pid
+*.seed
+*.pid.lock
+
+# Keystore files
+android/app/*.jks
+
+# Key properties file
+android/app/key.properties
