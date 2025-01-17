@@ -173,8 +173,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           containsNumber &&
                           containsSpecialChar &&
                           contains8Length;
-                      print(
-                          'Password validation result: $passwordValid for password: $val');
                       if (!passwordValid) {
                         return 'Please enter a valid password';
                       }

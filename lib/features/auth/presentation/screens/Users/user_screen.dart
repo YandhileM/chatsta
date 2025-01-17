@@ -117,7 +117,6 @@ class _UsersScreenState extends State<UsersScreen> {
 
       return filteredUsers;
     } catch (e) {
-      print('Error fetching users or chats: $e');
       return [];
     }
   }

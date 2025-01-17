@@ -20,11 +20,9 @@ class UserService {
         final List users = jsonDecode(response.body);
         return users.cast<Map<String, dynamic>>();
       } else {
-        print('Failed to fetch users. Status code: ${response.statusCode}');
         return [];
       }
     } catch (e) {
-      print('Error fetching users: $e');
       return [];
     }
   }
