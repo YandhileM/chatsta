@@ -25,12 +25,9 @@ class ChatsService {
       if (response.statusCode == 200) {
         return jsonDecode(response.body) as List<dynamic>;
       } else {
-        print('Fetch chats failed with status code: ${response.statusCode}');
-        print('Response body: ${response.body}');
         return null;
       }
     } catch (e) {
-      print('Error fetching chats: $e');
       return null;
     }
   }
@@ -51,12 +48,9 @@ class ChatsService {
       if (response.statusCode == 200) {
         return json.decode(response.body) as List<dynamic>;
       } else {
-        print('Failed to fetch chats: ${response.statusCode}');
-        print('Response body: ${response.body}');
         return [];
       }
     } catch (e) {
-      print('Error fetching chats: $e');
       return [];
     }
   }
@@ -80,13 +74,9 @@ class ChatsService {
       if (response.statusCode == 200) {
         return jsonDecode(response.body) as Map<String, dynamic>;
       } else {
-        print(
-            'Fetch chat details failed with status code: ${response.statusCode}');
-        print('Response body: ${response.body}');
         return null;
       }
     } catch (e) {
-      print('Error fetching chat details: $e');
       return null;
     }
   }
@@ -144,12 +134,9 @@ class ChatsService {
       if (response.statusCode == 200) {
         return List<Map<String, dynamic>>.from(json.decode(response.body));
       } else {
-        print('Failed to fetch chat messages: ${response.statusCode}');
-        print('Response body: ${response.body}');
         return [];
       }
     } catch (e) {
-      print('Error fetching chat messages: $e');
       return [];
     }
   }
@@ -180,12 +167,9 @@ class ChatsService {
       if (response.statusCode == 201) {
         return json.decode(response.body) as Map<String, dynamic>;
       } else {
-        print('Create chat failed with status code: ${response.statusCode}');
-        print('Response body: ${response.body}');
         return null;
       }
     } catch (e) {
-      print('Error creating chat: $e');
       return null;
     }
   }
@@ -213,12 +197,9 @@ Future<bool> sendMessage({
     if (response.statusCode == 201) {
       return true;
     } else {
-      print('Send message failed with status code: ${response.statusCode}');
-      print('Response body: ${response.body}');
       return false;
     }
   } catch (e) {
-    print('Error sending message: $e');
     return false;
   }
 }
@@ -243,13 +224,9 @@ Future<bool> sendMessage({
       if (response.statusCode == 200) {
         return List<Map<String, dynamic>>.from(json.decode(response.body));
       } else {
-        print(
-            'Fetch latest messages failed with status code: ${response.statusCode}');
-        print('Response body: ${response.body}');
         return [];
       }
     } catch (e) {
-      print('Error fetching latest messages: $e');
       return [];
     }
   }
@@ -279,13 +256,9 @@ Future<bool> sendMessage({
       if (response.statusCode == 200) {
         return json.decode(response.body) as Map<String, dynamic>;
       } else {
-        print(
-            'Get or create chat failed with status code: ${response.statusCode}');
-        print('Response body: ${response.body}');
         return null;
       }
     } catch (e) {
-      print('Error getting or creating chat: $e');
       return null;
     }
   }

@@ -7,7 +7,9 @@ import '../../core/constants/api_constants.dart';
 class ChatWebSocketService {
   WebSocketChannel? _channel;
   String? _chatId;
+  String? _accessKey;
   bool _isConnecting = false;
+  bool _intentionalClose = false;
   Timer? _reconnectionTimer;
   Timer? _heartbeatTimer;
   static const Duration _reconnectDelay = Duration(seconds: 5);
@@ -64,7 +66,9 @@ class ChatWebSocketService {
     if (_isConnecting) return;
 
     _chatId = chatId;
+    _accessKey = accessKey;
     _isConnecting = true;
+    _intentionalClose = false;
 
     // Set all callbacks
     this.onConnect = onConnect;
@@ -96,7 +100,9 @@ class ChatWebSocketService {
     } catch (e) {
       _isConnecting = false;
       onError?.call(e);
-      _scheduleReconnection();
+      if (!_intentionalClose) {
+        _scheduleReconnection();
+      }
     }
   }
 
@@ -119,17 +125,14 @@ class ChatWebSocketService {
           final data = jsonDecode(message);
           _handleWebSocketMessage(data);
         } catch (e) {
-          print('Error processing message: $e');
           onError?.call(e);
         }
       },
       onError: (error) {
-        print('WebSocket Error: $error');
         onError?.call(error);
         _handleDisconnection();
       },
       onDone: () {
-        print('WebSocket connection closed');
         _handleDisconnection();
       },
     );
@@ -142,13 +145,18 @@ class ChatWebSocketService {
   }
 
   void _scheduleReconnection() {
+    if (_intentionalClose) return;
+
     _reconnectionTimer?.cancel();
     _reconnectionTimer = Timer(_reconnectDelay, () {
-      if (_chatId != null && !isConnected && !_isConnecting) {
+      if (_chatId != null &&
+          _accessKey != null &&
+          !isConnected &&
+          !_isConnecting &&
+          !_intentionalClose) {
         connectToChat(
           chatId: _chatId!,
-          accessKey:
-              'YOUR_ACCESS_KEY', // You'll need to store this or pass it again
+          accessKey: _accessKey!,
           onConnect: onConnect,
           onDisconnect: onDisconnect,
           onError: onError,
@@ -220,7 +228,6 @@ class ChatWebSocketService {
         break;
 
       default:
-        print('Unhandled WebSocket event: $action');
     }
   }
 
@@ -291,6 +298,23 @@ class ChatWebSocketService {
     }
   }
 
+  void close() {
+    _intentionalClose = true;
+    _reconnectionTimer?.cancel();
+    _heartbeatTimer?.cancel();
+    try {
+      _channel?.sink.close(status.normalClosure);
+    } catch (e) {
+      // Error intentionally ignored
+    } finally {
+      _channel = null;
+      _chatId = null;
+      _accessKey = null;
+      _isConnecting = false;
+    }
+  }
+
+
   // Clean up resources
   void dispose() {
     _reconnectionTimer?.cancel();
@@ -299,5 +323,6 @@ class ChatWebSocketService {
     _channel = null;
     _chatId = null;
     _isConnecting = false;
+    close();
   }
 }

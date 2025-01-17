@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:web_socket_channel/web_socket_channel.dart';
-import 'package:web_socket_channel/status.dart' as status;
+// import 'package:web_socket_channel/status.dart' as status;
 import '../../core/constants/api_constants.dart';
 
 class ChatWebSocketService {
@@ -52,11 +52,9 @@ class ChatWebSocketService {
         _handleWebSocketMessage(data);
       },
       onError: (error) {
-        print('WebSocket Error: $error');
         _reconnect();
       },
       onDone: () {
-        print('WebSocket connection closed');
         _reconnect();
       },
     );
@@ -98,7 +96,6 @@ class ChatWebSocketService {
         break;
 
       default:
-        print('Unhandled WebSocket event: ${message['action']}');
     }
   }
 
@@ -120,9 +117,15 @@ class ChatWebSocketService {
   }
 
   void disconnect() {
-    _channel?.sink.close(status.goingAway);
-    _channel = null;
-    _username = null;
-    _secret = null;
+    try {
+
+      _channel?.sink.close(1000);
+    } catch (e) {
+      // print('Error closing WebSocket connection: $e');
+    } finally {
+      _channel = null;
+      _username = null;
+      _secret = null;
+    }
   }
 }

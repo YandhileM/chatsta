@@ -36,13 +36,9 @@ class AuthService {
       if (response.statusCode == 201) {
         return true;
       } else {
-        print('Sign up failed with status code: ${response.statusCode}');
-        print('Response body: ${response.body}');
         return false;
       }
-    } catch (e, stackTrace) {
-      print('Error during signup: $e');
-      print('Stack trace: $stackTrace');
+    } catch (e) {
       return false;
     }
   }
@@ -64,12 +60,9 @@ class AuthService {
       if (response.statusCode == 200) {
         return true;
       } else {
-        print('Sign in failed with status code: ${response.statusCode}');
-        print('Response body: ${response.body}');
         return false;
       }
     } catch (e) {
-      print('Error during sign in: $e');
       return false;
     }
   }
@@ -90,12 +83,9 @@ class AuthService {
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
       } else {
-        print('Get user failed with status code: ${response.statusCode}');
-        print('Response body: ${response.body}');
         return null;
       }
     } catch (e) {
-      print('Error getting user: $e');
       return null;
     }
   }
