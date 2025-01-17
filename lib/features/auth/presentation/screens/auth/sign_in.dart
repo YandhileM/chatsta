@@ -138,6 +138,7 @@ class _SignInScreenState extends State<SignInScreen> {
                                   passwordController.text.trim(),
                                 );
 
+                                if (!mounted) return;
                                 // Navigate to HomeScreen
                                 Navigator.pushReplacement(
                                   context,
