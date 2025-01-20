@@ -86,13 +86,11 @@ class _HomeScreenState extends State<HomeScreen> {
           isLoading = false;
         });
       } else {
-        print('User credentials are missing in SharedPreferences.');
         setState(() {
           isLoading = false;
         });
       }
     } catch (e) {
-      print('Error loading chats: $e');
       setState(() {
         isLoading = false;
       });
@@ -304,7 +302,10 @@ onTap: () async {
                             }
                           }
                         } catch (e) {
-                          print('Error navigating to chat: $e');
+                          
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Failed to open chat: $e')),
+                          );
                         }
                       },
                     );

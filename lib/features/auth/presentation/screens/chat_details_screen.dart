@@ -53,13 +53,10 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
 
       // Connection events
       onConnect: () {
-        print('Connected to chat ${widget.chatId}');
       },
       onDisconnect: () {
-        print('Disconnected from chat ${widget.chatId}');
       },
       onError: (error) {
-        print('WebSocket error: $error');
       },
 
       // Chat events
@@ -73,29 +70,22 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
       },
 
       // Message events
-onMessageCreated: (data) {
-        print('Raw WebSocket data received: $data');
-
-        // Extract the message data from the nested structure
-        final messageData = data['message'] as Map<String, dynamic>;
-
-        final newMessage = {
-          'id': messageData['id']?.toString() ??
-              DateTime.now().millisecondsSinceEpoch.toString(),
-          'text': messageData['text'] ?? '',
-          'sender_username': messageData['sender_username'] ??
-              messageData['sender']?['username'] ?? 
-              'Unknown',
-          'created':
-              messageData['created'] ?? DateTime.now().toUtc().toString(),
-        };
-
-        print('Formatted message: $newMessage');
-
-        setState(() {
-          messages = [...messages, newMessage];
-          print('Updated messages length: ${messages.length}');
-        });
+      onMessageCreated: (data) {
+        if (mounted) {
+          setState(() {
+            final messageData = data['message'] as Map<String, dynamic>;
+            messages.add({
+              'id': messageData['id']?.toString() ??
+                  DateTime.now().millisecondsSinceEpoch.toString(),
+              'text': messageData['text'] ?? '',
+              'sender_username': messageData['sender_username'] ??
+                  messageData['sender']?['username'] ??
+                  'Unknown',
+              'created':
+                  messageData['created'] ?? DateTime.now().toUtc().toString(),
+            });
+          });
+        }
       },
 
 
@@ -140,8 +130,8 @@ onMessageCreated: (data) {
           ),
         );
       },
-      onUserTyping: (username) {
-        if (username != currentUsername) {
+onUserTyping: (username) {
+        if (username != currentUsername && mounted) {
           setState(() {
             typingUsers.add(username);
           });
@@ -159,7 +149,7 @@ onMessageCreated: (data) {
 
   @override
   void dispose() {
-    _wsService.dispose();
+    _wsService.close(); 
     _controller.dispose();
     super.dispose();
   }
@@ -170,8 +160,6 @@ String formatDateTime(String dateTimeString) {
       final DateTime dateTime = DateTime.parse(dateTimeString);
       return DateFormat('yyyy/MM/dd HH:mm').format(dateTime.toLocal());
     } catch (e) {
-      print('Error formatting date: $e');
-      print('Problematic dateTimeString: $dateTimeString');
       return 'Unknown Date';
     }
   }
@@ -203,7 +191,6 @@ String formatDateTime(String dateTimeString) {
         });
       }
     } catch (e) {
-      print('Error loading messages: $e');
       setState(() {
         isLoading = false;
       });
@@ -378,20 +365,19 @@ String formatDateTime(String dateTimeString) {
 
                                 if (success) {
                                   setState(() {
-                                    messages.add({
-                                      'id': DateTime.now()
-                                          .millisecondsSinceEpoch
-                                          .toString(),
-                                      'text': message,
-                                      'sender_username': currentUsername,
-                                      'created':
-                                          DateTime.now().toUtc().toString(),
-                                    });
+                                    // messages.add({
+                                    //   'id': DateTime.now()
+                                    //       .millisecondsSinceEpoch
+                                    //       .toString(),
+                                    //   'text': message,
+                                    //   'sender_username': currentUsername,
+                                    //   'created':
+                                    //       DateTime.now().toUtc().toString(),
+                                    // });
                                     _controller.clear();
                                     message = '';
                                   });
                                 } else {
-                                  print('Failed to send the message.');
                                 }
                               }
                             },
