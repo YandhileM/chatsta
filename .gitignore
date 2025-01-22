@@ -59,3 +59,25 @@ ios/Flutter/Flutter.framework.dSYM
 # Keystore files
 android/app/*.jks
 android/key.properties
+**/android/*.jks
+
+# Android build and generated files
+**/android/**/*.bin
+**/android/**/*.lock
+**/android/**/gc.properties
+**/android/.gradle/
+**/android/captures/
+**/android/local.properties
+**/android/**/GeneratedPluginRegistrant.java
+**/android/gradlew
+**/android/gradlew.bat
+**/android/gradle-wrapper.jar
+**/android/**/file-system.probe
+**/android/**/md5-checksums.bin
+**/android/**/sha1-checksums.bin
+**/android/**/executionHistory.bin
+**/android/**/last-build.bin
+**/android/**/fileHashes.bin
+**/android/**/resourceHashesCache.bin
+**/android/**/cache.properties
+**/android/**/outputFiles.bin
