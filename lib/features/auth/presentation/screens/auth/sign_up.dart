@@ -84,10 +84,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
           }
         } else {
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Sign-up failed. Please try again.'),
-              ),
+ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Sign-up failed: $response')),
             );
           }
         }

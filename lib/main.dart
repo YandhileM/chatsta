@@ -7,7 +7,7 @@ Future<void> main() async {
 
   // Load .env file
   await dotenv.load(fileName: ".env");
-  runApp(const MyApp());
+  runApp(const MyApp()); 
 }
 
 class MyApp extends StatelessWidget {
