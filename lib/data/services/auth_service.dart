@@ -21,19 +21,21 @@ class AuthService {
       final response = await http.post(
         Uri.parse('$baseUrl/users/'),
         headers: {
-          'Private-Key': privateKey,
+          'Project-ID': privateKey,
           'Content-Type': 'application/json',
         },
         body: jsonEncode({
           'username': username,
-          'first_name': firstName,
-          'last_name': lastName,
+          'FirstName': firstName,
+          'LastName': lastName,
           'secret': secret,
-          'custom_json': jsonEncode(customJson ?? {}), // Convert to string
+          'custom_json': jsonEncode(customJson ?? {}), 
         }),
       );
+      print('Sign-up response status code: ${response.statusCode}');
+      print('Sign-up response body: ${response.body}');
 
-      if (response.statusCode == 201) {
+      if (response.statusCode == 200) {
         return true;
       } else {
         return false;
@@ -51,11 +53,14 @@ class AuthService {
       final response = await http.get(
         Uri.parse('$baseUrl/users/me/'),
         headers: {
-          'Project-ID': projectId,
+          'Project-ID': privateKey,
           'User-Name': username,
           'User-Secret': secret,
         },
       );
+
+          print('Sign-in response status code: ${response.statusCode}');
+      print('Sign-in response body: ${response.body}');
 
       if (response.statusCode == 200) {
         return true;
@@ -74,7 +79,7 @@ class AuthService {
       final response = await http.get(
         Uri.parse('$baseUrl/users/me/'),
         headers: {
-          'Project-ID': projectId,
+          'Project-ID': privateKey,
           'User-Name': username,
           'User-Secret': secret,
         },
