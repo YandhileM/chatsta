@@ -12,7 +12,7 @@ class UserService {
       final response = await http.get(
         Uri.parse('$baseUrl/users/'),
         headers: {
-          'PRIVATE-KEY': privateKey,
+          'Project-ID': privateKey,
         },
       );
 
