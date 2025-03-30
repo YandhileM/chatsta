@@ -5,7 +5,8 @@ import '../../core/constants/api_constants.dart';
 
 class ChatsService {
   final String baseUrl = ApiConstants.baseUrl;
-  final String projectId = ApiConstants.projectId;
+  // final String projectId = ApiConstants.projectId;
+    final String privateKey = ApiConstants.privateKey;
 
   /// Fetches the list of chats for the authenticated user.
   Future<List<dynamic>?> fetchChats({
@@ -16,7 +17,7 @@ class ChatsService {
       final response = await http.get(
         Uri.parse('$baseUrl/chats/'),
         headers: {
-          'Project-ID': projectId,
+          'Project-ID': privateKey,
           'User-Name': username,
           'User-Secret': secret,
         },
@@ -39,7 +40,7 @@ class ChatsService {
       final response = await http.get(
         Uri.parse('$baseUrl/chats/'),
         headers: {
-          'Project-ID': projectId,
+          'Project-ID': privateKey,
           'User-Name': username,
           'User-Secret': secret,
         },
@@ -65,7 +66,7 @@ class ChatsService {
       final response = await http.get(
         Uri.parse('$baseUrl/chats/$chatId/'),
         headers: {
-          'Project-ID': projectId,
+          'Project-ID': privateKey,
           'User-Name': username,
           'User-Secret': secret,
         },
@@ -93,7 +94,7 @@ class ChatsService {
   //     final response = await http.post(
   //       Uri.parse('$baseUrl/chats/$chatId/messages/'),
   //       headers: {
-  //         'Project-ID': projectId,
+  //         'Project-ID': privateKey,
   //         'User-Name': username,
   //         'User-Secret': secret,
   //         'Content-Type': 'application/json',
@@ -125,7 +126,7 @@ class ChatsService {
       final response = await http.get(
         Uri.parse('$baseUrl/chats/$chatId/messages/'),
         headers: {
-          'Project-ID': projectId,
+          'Project-ID': privateKey,
           'User-Name': username,
           'User-Secret': secret,
         },
@@ -152,7 +153,7 @@ class ChatsService {
       final response = await http.put(
         Uri.parse('$baseUrl/chats/'),
         headers: {
-          'Project-ID': projectId,
+          'Project-ID': privateKey,
           'User-Name': username,
           'User-Secret': secret,
           'Content-Type': 'application/json',
@@ -184,7 +185,7 @@ Future<bool> sendMessage({
     final response = await http.post(
       Uri.parse('$baseUrl/chats/$chatId/messages/'),
       headers: {
-        'Project-ID': projectId,
+        'Project-ID': privateKey,
         'User-Name': username,
         'User-Secret': secret,
         'Content-Type': 'application/json',
@@ -215,7 +216,7 @@ Future<bool> sendMessage({
       final response = await http.get(
         Uri.parse('$baseUrl/chats/$chatId/messages/latest/$chatCount/'),
         headers: {
-          'Project-ID': projectId,
+          'Project-ID': privateKey,
           'User-Name': username,
           'User-Secret': secret,
         },
@@ -241,7 +242,7 @@ Future<bool> sendMessage({
       final response = await http.put(
         Uri.parse('$baseUrl/chats/'),
         headers: {
-          'Project-ID': projectId,
+          'Project-ID': privateKey,
           'User-Name': username,
           'User-Secret': secret,
           'Content-Type': 'application/json',
