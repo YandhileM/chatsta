@@ -51,7 +51,7 @@ class AuthService {
   }) async {
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl/users/me/'),
+        Uri.parse('$baseUrl/me/'),
         headers: {
           'Project-ID': privateKey,
           'User-Name': username,
