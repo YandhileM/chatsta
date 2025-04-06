@@ -93,7 +93,7 @@ class _UsersScreenState extends State<UsersScreen> {
       }
 
       // Fetch all users
-      final allUsers = await _userService.fetchUsers();
+      final allUsers = await _userService.fetchUsers(currentUsername, secret);
 
       // Fetch existing chats
       final existingChats = await _chatService.fetchChats(
