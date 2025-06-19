@@ -76,13 +76,18 @@ class _UsersScreenState extends State<UsersScreen> {
   late Future<List<Map<String, dynamic>>> _futureUsers;
   final Random _random = Random();
 
-  @override
-  void initState() {
-    super.initState();
-    _futureUsers = _fetchFilteredUsers();
-  }
+@override
+void initState() {
+  super.initState();
+  // Delay the API calls until after the widget is built
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    setState(() {
+      _futureUsers = _fetchFilteredUsers();
+    });
+  });
+}
 
-  Future<List<Map<String, dynamic>>> _fetchFilteredUsers() async {
+Future<List<Map<String, dynamic>>> _fetchFilteredUsers() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final currentUsername = prefs.getString('username');
@@ -92,14 +97,15 @@ class _UsersScreenState extends State<UsersScreen> {
         throw Exception('User credentials not found');
       }
 
-      // Fetch all users
-      final allUsers = await _userService.fetchUsers(currentUsername, secret);
+      // Run both API calls in parallel for better performance
+      final futures = await Future.wait([
+        _userService.fetchUsers(currentUsername, secret),
+        _chatService.fetchChats(username: currentUsername, secret: secret),
+      ]);
 
-      // Fetch existing chats
-      final existingChats = await _chatService.fetchChats(
-        username: currentUsername,
-        secret: secret,
-      );
+      // Cast the first result to the correct type
+      final allUsers = (futures[0] as List).cast<Map<String, dynamic>>();
+      final existingChats = futures[1];
 
       // Extract usernames of users already in chats
       final usernamesInChats = existingChats
@@ -109,15 +115,14 @@ class _UsersScreenState extends State<UsersScreen> {
           {};
 
       // Filter users: Exclude logged-in user and already-added users
-      final filteredUsers = allUsers
+      return allUsers
           .where((user) =>
               user['username'] != currentUsername &&
               !usernamesInChats.contains(user['username']))
           .toList();
-
-      return filteredUsers;
     } catch (e) {
-      return [];
+      print('Error fetching users: $e'); // Add logging
+      return []; // Return empty list on error
     }
   }
 
@@ -264,7 +269,7 @@ class _UsersScreenState extends State<UsersScreen> {
                             ),
                           ),
                           title: Text(
-                            '${user['first_name']} ${user['last_name']}',
+                            '${user['firstName']} ${user['lastName']}',
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                             ),
