@@ -76,10 +76,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
           // Save username and secret in SharedPreferences
           await _saveCredentials(username, secret);
+         await Future.delayed(const Duration(milliseconds: 300));
+
           if (mounted) {
-            Navigator.pushReplacement(
+            // Use pushAndRemoveUntil to clear previous routes
+            Navigator.pushAndRemoveUntil(
               context,
               MaterialPageRoute(builder: (context) => const UsersScreen()),
+              (route) => false,
             );
           }
         } else {
